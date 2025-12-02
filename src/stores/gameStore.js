@@ -124,6 +124,17 @@ export const useGameStore = defineStore('game', () => {
       return;
     }
 
+    // If starting a new trick and previous trick was complete, clear it
+    if (currentTrick.value.cards.length === 4) {
+      currentTrick.value = {
+        id: currentTrick.value.id + 1,
+        cards: [],
+        leadPlayerId: null,
+        winnerId: null,
+        leadSuit: null
+      };
+    }
+
     const card = player.hand[cardIndex];
     player.hand.splice(cardIndex, 1);
 
@@ -136,19 +147,9 @@ export const useGameStore = defineStore('game', () => {
       currentTrick.value.leadSuit = card.suit;
     }
 
-    // If trick is complete (4 cards), will handle evaluation later
-    if (currentTrick.value.cards.length === 4) {
-      // For now, just clear the trick after a delay
-      setTimeout(() => {
-        currentTrick.value = {
-          id: currentTrick.value.id + 1,
-          cards: [],
-          leadPlayerId: null,
-          winnerId: null,
-          leadSuit: null
-        };
-      }, 1500);
-    } else {
+    // If trick is complete (4 cards), don't advance turn yet
+    // Wait for next card click to start new trick
+    if (currentTrick.value.cards.length < 4) {
       // Advance to next player
       currentPlayer.value = (currentPlayer.value % 4) + 1;
     }
