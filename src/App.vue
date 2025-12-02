@@ -1,5 +1,6 @@
 <script setup>
 import Card from './components/Card.vue';
+import TrickDisplay from './components/TrickDisplay.vue';
 import { useGameStore } from './stores/gameStore';
 import { onMounted, computed, ref, watch } from 'vue';
 import { useDeckLogic } from './composables/useDeckLogic';
@@ -19,6 +20,7 @@ onMounted(() => {
   game.initializeDeck();
   game.setPlayerCount(4);
   game.dealHands(13);
+  game.skipBidding('hearts');
 });
 
 watch(
@@ -50,6 +52,10 @@ const groupedHands = computed(() => {
   }
   return hands;
 });
+
+function handleCardClick(card, playerId) {
+  game.playCard(playerId, card.id);
+}
 
 // 1. Get all hearts from a hand
 // 2. Get all face cards (jack, queen, king)
@@ -87,12 +93,57 @@ const groupedHands = computed(() => {
 
 
 <template>
-  <div v-for="hand in groupedHands" :key="hand.playerId">
-    <div v-for="suit in suitOrder" :key="suit">
-      <div>
-        <Card v-for="card in hand.suits[suit]" :key="card.id" :suit="card.suit" :rank="card.rank" />
-      </div>
+  <div class="bridge-game">
+    <h1>Bridge Game</h1>
+
+    <div v-if="game.gamePhase !== 'setup'">
+      <p>Game Phase: {{ game.gamePhase }} | Current Player: {{ game.currentPlayer }} | Trump: {{ game.contract?.trump }}</p>
     </div>
-    <hr />
+
+    <TrickDisplay v-if="game.gamePhase === 'playing' || game.gamePhase === 'trickComplete'" />
+
+    <div v-for="hand in groupedHands" :key="hand.playerId" class="player-hand">
+      <h3>Player {{ hand.playerId }} ({{ game.players.find(p => p.id === hand.playerId)?.position }})</h3>
+      <div v-for="suit in suitOrder" :key="suit" class="suit-group">
+        <div>
+          <Card
+            v-for="card in hand.suits[suit]"
+            :key="card.id"
+            :suit="card.suit"
+            :rank="card.rank"
+            :clickable="hand.playerId === game.currentPlayer && game.gamePhase === 'playing'"
+            @card-click="handleCardClick(card, hand.playerId)"
+          />
+        </div>
+      </div>
+      <hr />
+    </div>
   </div>
 </template>
+
+<style scoped>
+.bridge-game {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.player-hand {
+  margin-bottom: 2rem;
+}
+
+.suit-group {
+  margin-bottom: 0.5rem;
+}
+
+.suit-group > div {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+</style>

@@ -9,6 +9,19 @@ export const useGameStore = defineStore('game', () => {
   const deck = ref([]);
   const players = ref([]);
 
+  // Bridge game state
+  const gamePhase = ref('setup');
+  const currentTrick = ref({
+    id: 1,
+    cards: [],
+    leadPlayerId: null,
+    winnerId: null,
+    leadSuit: null
+  });
+  const currentPlayer = ref(1);
+  const contract = ref(null);
+  const trickHistory = ref([]);
+
   // Computed
   const cardsInDeck = computed(() => deck.value.length);
   const playerCount = computed(() => players.value.length);
@@ -19,11 +32,15 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function setPlayerCount(count) {
+    const positions = ['south', 'west', 'north', 'east'];
     players.value = [];
     for (let i = 0; i < count; i++) {
       players.value.push({
         id: i + 1,
-        hand: []
+        hand: [],
+        isHuman: i === 0,
+        position: positions[i],
+        tricksWon: 0
       });
     }
   }
@@ -78,10 +95,74 @@ export const useGameStore = defineStore('game', () => {
     initializeDeck();
   }
 
+  function skipBidding(trump = 'hearts') {
+    contract.value = {
+      level: 1,
+      trump: trump,
+      declarer: 1,
+      target: 7
+    };
+    gamePhase.value = 'playing';
+    currentPlayer.value = 1;
+  }
+
+  function playCard(playerId, cardId) {
+    if (gamePhase.value !== 'playing') {
+      console.warn('Cannot play card: game not in playing phase');
+      return;
+    }
+
+    const player = players.value.find(p => p.id === playerId);
+    if (!player) {
+      console.warn(`Player ${playerId} not found!`);
+      return;
+    }
+
+    const cardIndex = player.hand.findIndex(c => c.id === cardId);
+    if (cardIndex === -1) {
+      console.warn(`Card ${cardId} not found in player ${playerId}'s hand!`);
+      return;
+    }
+
+    const card = player.hand[cardIndex];
+    player.hand.splice(cardIndex, 1);
+
+    // Add card to current trick
+    currentTrick.value.cards.push({ playerId, card });
+
+    // Set lead player and suit if this is first card
+    if (currentTrick.value.cards.length === 1) {
+      currentTrick.value.leadPlayerId = playerId;
+      currentTrick.value.leadSuit = card.suit;
+    }
+
+    // If trick is complete (4 cards), will handle evaluation later
+    if (currentTrick.value.cards.length === 4) {
+      // For now, just clear the trick after a delay
+      setTimeout(() => {
+        currentTrick.value = {
+          id: currentTrick.value.id + 1,
+          cards: [],
+          leadPlayerId: null,
+          winnerId: null,
+          leadSuit: null
+        };
+      }, 1500);
+    } else {
+      // Advance to next player
+      currentPlayer.value = (currentPlayer.value % 4) + 1;
+    }
+  }
+
   return {
     // State
     deck,
     players,
+    gamePhase,
+    currentTrick,
+    currentPlayer,
+    contract,
+    trickHistory,
     // Computed
     cardsInDeck,
     playerCount,
@@ -91,6 +172,8 @@ export const useGameStore = defineStore('game', () => {
     dealCard,
     dealToAll,
     dealHands,
-    reset
+    reset,
+    skipBidding,
+    playCard
   };
 });
