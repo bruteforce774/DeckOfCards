@@ -9,7 +9,6 @@ export const useGameStore = defineStore('game', () => {
   const deck = ref([]);
   const players = ref({
     player1: [],
-    player2: []
   });
 
   // Computed
@@ -34,7 +33,6 @@ export const useGameStore = defineStore('game', () => {
 
   function reset() {
     players.value.player1 = [];
-    players.value.player2 = [];
     initializeDeck();
   }
 
