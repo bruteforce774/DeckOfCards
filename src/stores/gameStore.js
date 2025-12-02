@@ -7,32 +7,74 @@ export const useGameStore = defineStore('game', () => {
 
   // State
   const deck = ref([]);
-  const players = ref({
-    player1: [],
-  });
+  const players = ref([]);
 
   // Computed
   const cardsInDeck = computed(() => deck.value.length);
+  const playerCount = computed(() => players.value.length);
 
   // Actions
   function initializeDeck() {
     deck.value = shuffleDeck(createDeck());
   }
 
-  function dealCard(playerName) {
+  function setPlayerCount(count) {
+    players.value = [];
+    for (let i = 0; i < count; i++) {
+      players.value.push({
+        id: i + 1,
+        hand: []
+      });
+    }
+  }
+
+  function dealCard(playerId) {
     if (deck.value.length === 0) {
       console.warn('No cards left in deck!');
-      return;
+      return null;
+    }
+
+    const player = players.value.find(p => p.id === playerId);
+    if (!player) {
+      console.warn(`Player ${playerId} not found!`);
+      return null;
     }
 
     const card = deck.value.pop();
-    if (players.value[playerName]) {
-      players.value[playerName].push(card);
+    player.hand.push(card);
+    return card;
+  }
+
+  function dealToAll() {
+    if (deck.value.length < players.value.length) {
+      console.warn('Not enough cards to deal to all players!');
+      return;
+    }
+
+    players.value.forEach(player => {
+      if (deck.value.length > 0) {
+        const card = deck.value.pop();
+        player.hand.push(card);
+      }
+    });
+  }
+
+  function dealHands(cardsPerPlayer) {
+    const totalCardsNeeded = cardsPerPlayer * players.value.length;
+    if (deck.value.length < totalCardsNeeded) {
+      console.warn(`Not enough cards! Need ${totalCardsNeeded}, have ${deck.value.length}`);
+      return;
+    }
+
+    for (let i = 0; i < cardsPerPlayer; i++) {
+      dealToAll();
     }
   }
 
   function reset() {
-    players.value.player1 = [];
+    players.value.forEach(player => {
+      player.hand = [];
+    });
     initializeDeck();
   }
 
@@ -42,9 +84,13 @@ export const useGameStore = defineStore('game', () => {
     players,
     // Computed
     cardsInDeck,
+    playerCount,
     // Actions
     initializeDeck,
+    setPlayerCount,
     dealCard,
+    dealToAll,
+    dealHands,
     reset
   };
 });
