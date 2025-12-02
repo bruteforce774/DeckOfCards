@@ -1,7 +1,7 @@
 <script setup>
 import Card from './components/Card.vue';
 import { useGameStore } from './stores/gameStore';
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 
 const game = useGameStore();
 
@@ -10,8 +10,10 @@ onMounted(() => {
   game.setPlayerCount(4);
   game.dealHands(13);
 });
+
+const hand = computed(() => game.players[0]?.hand || []);
 </script>
 
 <template>
-  More to come...
+  <Card v-for="card in hand" :key="card.id" :suit="card.suit" :rank="card.rank" />
 </template>
