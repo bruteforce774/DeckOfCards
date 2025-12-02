@@ -79,6 +79,10 @@ const groupedHands = computed(() => {
 // const names = game.players.map(player => player.name);
 
 // const allHearts = hand.every(card => card.suit === 'hearts');
+
+// const playersWithAces = game.players
+// .filter(player => (player.hand || []).some(card => card.rank === 'ace'))
+// .map(player => player.name);
 </script>
 
 
