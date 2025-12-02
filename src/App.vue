@@ -104,8 +104,8 @@ function handleCardClick(card, playerId) {
 
     <div v-for="hand in groupedHands" :key="hand.playerId" class="player-hand">
       <h3>Player {{ hand.playerId }} ({{ game.players.find(p => p.id === hand.playerId)?.position }})</h3>
-      <div v-for="suit in suitOrder" :key="suit" class="suit-group">
-        <div>
+      <div class="cards-row">
+        <template v-for="suit in suitOrder" :key="suit">
           <Card
             v-for="card in hand.suits[suit]"
             :key="card.id"
@@ -114,9 +114,8 @@ function handleCardClick(card, playerId) {
             :clickable="hand.playerId === game.currentPlayer && game.gamePhase === 'playing'"
             @card-click="handleCardClick(card, hand.playerId)"
           />
-        </div>
+        </template>
       </div>
-      <hr />
     </div>
   </div>
 </template>
@@ -137,13 +136,17 @@ h1 {
   margin-bottom: 2rem;
 }
 
-.suit-group {
-  margin-bottom: 0.5rem;
+.cards-row {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: nowrap;
 }
 
-.suit-group > div {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.cards-row .card-wrapper {
+  flex-shrink: 0;
+}
+
+.cards-row .card-wrapper img {
+  width: 70px;
 }
 </style>
