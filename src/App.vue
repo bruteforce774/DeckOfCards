@@ -36,13 +36,13 @@ const groupedHands = computed(() => {
     const player = game.players[idx];
     if (!player) continue;
     const suitsObj = {};
-    
+
     for (const suit of suitOrder) {
       const cardsOfSuit = (player.hand || []).filter(card => card.suit === suit);
       const sortedCards = sortByRankDesc(cardsOfSuit);
       suitsObj[suit] = sortedCards;
     }
-    
+
     hands.push({
       playerId: player.id,
       suits: suitsObj
@@ -50,6 +50,35 @@ const groupedHands = computed(() => {
   }
   return hands;
 });
+
+// 1. Get all hearts from a hand
+// 2. Get all face cards (jack, queen, king)
+// 3. Sort cards by suit alphabetically
+// 4. Count cards in each suit
+// 5. Check if hand has any aces
+// 6. Create array of player names from game.players
+
+// const hearts = hand.filter(card => card.suit === 'hearts');
+
+// const faceCards = hand.filter(card =>
+//   ['jack', 'queen', 'king'].includes(card.rank)
+// );
+
+// const sorted = [...hand].sort((a, b) => suits.indexOf(a.suit) - suits.indexOf(b.suit));
+
+// const counts = {};
+// for (const card of hand) {
+//   if (!counts[card.suit]) {
+//     counts[card.suit] = 0;
+//   }
+//   counts[card.suit]++;
+// }
+
+// const hasAce = hand.some(card => card.rank === 'ace');
+
+// const names = game.players.map(player => player.name);
+
+// const allHearts = hand.every(card => card.suit === 'hearts');
 </script>
 
 
@@ -63,4 +92,3 @@ const groupedHands = computed(() => {
     <hr />
   </div>
 </template>
-
