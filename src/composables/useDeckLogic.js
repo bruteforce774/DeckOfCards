@@ -27,6 +27,8 @@ export function useDeckLogic() {
 
   return {
     createDeck,
-    shuffleDeck
+    shuffleDeck,
+    ranks,
+    suits
   };
 }
