@@ -145,12 +145,10 @@ export const useGameStore = defineStore('game', () => {
     if (currentTrick.value.cards.length === 1) {
       currentTrick.value.leadPlayerId = playerId;
       currentTrick.value.leadSuit = card.suit;
-    }
-
-    // If trick is complete (4 cards), don't advance turn yet
-    // Wait for next card click to start new trick
-    if (currentTrick.value.cards.length < 4) {
-      // Advance to next player
+      // Set current player to the one after the leader
+      currentPlayer.value = (playerId % 4) + 1;
+    } else if (currentTrick.value.cards.length < 4) {
+      // Advance to next player (only if trick not complete)
       currentPlayer.value = (currentPlayer.value % 4) + 1;
     }
   }

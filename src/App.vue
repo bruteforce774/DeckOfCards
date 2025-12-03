@@ -97,7 +97,15 @@ function handleCardClick(card, playerId) {
     <h1>Bridge Game</h1>
 
     <div v-if="game.gamePhase !== 'setup'">
-      <p>Game Phase: {{ game.gamePhase }} | Current Player: {{ game.currentPlayer }} | Trump: {{ game.contract?.trump }}</p>
+      <p>
+        Trump: {{ game.contract?.trump }} |
+        <span v-if="game.currentTrick.cards.length === 0 || game.currentTrick.cards.length === 4">
+          Any player can lead
+        </span>
+        <span v-else>
+          Current Player: {{ game.currentPlayer }}
+        </span>
+      </p>
     </div>
 
     <TrickDisplay v-if="game.gamePhase === 'playing' || game.gamePhase === 'trickComplete'" />
@@ -111,7 +119,7 @@ function handleCardClick(card, playerId) {
             :key="card.id"
             :suit="card.suit"
             :rank="card.rank"
-            :clickable="hand.playerId === game.currentPlayer && game.gamePhase === 'playing'"
+            :clickable="(game.currentTrick.cards.length === 0 || game.currentTrick.cards.length === 4 || hand.playerId === game.currentPlayer) && game.gamePhase === 'playing'"
             @card-click="handleCardClick(card, hand.playerId)"
           />
         </template>
